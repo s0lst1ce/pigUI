@@ -85,6 +85,7 @@ class Container(object):
 		hover:    if the hovered attribute of the widget should be set to True when the mouse hovers the said widget surface"""
 		
 		#building dimensions
+		assert x<=100 and y<=100, ValueError("Can't place at more than 100% of the container's dimensions")
 		if w!=None:
 			rw=int(w*self.w) #may need to change that int for blankspace may be left
 		else:
@@ -96,7 +97,8 @@ class Container(object):
 			rh = widget.h
 
 		assert rw<=self.w and rh<=self.h, ValueError(f"Dimensions are too big. Specified width ({w}) and height ({h}) should be inferior or equal to {self.w} and {self.h} respectively")
-		rect = pg.Rect(x, y, rw, rh)
+		rect = pg.Rect((self.w-rw)/100*x, (self.h-rh)/100*y, rw, rh)
+		print(rect)
 
 		#handling overblitting protection
 		if not override:
@@ -190,6 +192,7 @@ class Container(object):
 		self.surf=self.make_surf()
 		return self.surf.copy()
 
+
 class TextWidget(Widget):
 	"""TextWidget is a class which provides methods for some common actions used by classes which render text.
 	See Widget for the 4 first arguments.
@@ -199,17 +202,20 @@ class TextWidget(Widget):
 	fgcolor:    color of the text
 	font:       font to be used. None will default to Pygame's default font
 	underlined: whether the text should be underlined. This is a software rendering post-processing.
-	bold:       whether the text should be bold. Note that this is a software rendering post-processing done on the font. Prefer bold fonts instead."""
+	bold:       whether the text should be bold. Note that this is a software rendering post-processing done on the font. Prefer bold fonts instead"""
 	def __init__(self, w, h, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, can_hover=False, max_chars=False):
 		super(TextWidget, self).__init__(w, h, alpha=alpha, can_hover=can_hover)
 
 		#text properties
 		self._text = text
 		self.bgcolor = bgcolor
-		if bgcolor==None and alpha:
-			self.bgcolor = ALPHA
+		if bgcolor==None:
+			if alpha:
+				self.bgcolor = ALPHA
+			else:
+				self.bgcolor = WHITE
 		else:
-			self.bgcolor = WHITE
+			self.bgcolor = bgcolor
 		self.fgcolor = fgcolor
 		self.bold = bold
 		self.underlined = underlined
@@ -226,8 +232,15 @@ class TextWidget(Widget):
 			self.surf = self.surf.convert_alpha()
 		else:
 			self.surf = self.surf.convert()
-
 		self.surf.fill(self.bgcolor)
+
+		#rendering text TODO: implement font scaling to fit text into provided surface
+		nrect = self.font.get_rect(self._text)
+		if nrect.w>self.w or nrect.h>self.h:
+			raise ValueError("Text size larger than widget")
+		self.render_text()
+
+
 
 	@property
 	def text(self):
@@ -235,16 +248,20 @@ class TextWidget(Widget):
 
 	@text.setter
 	def text(self, string):
+		nrect = self.font.get_rect(string)
+		if nrect.w>self.w or nrect.h>self.h:
+			raise ValueError("Text size larger than widget")
 		self.changed = True
 		self._text = string
-		self.surf = self.render_text()
+		self.render_text()
 
 	def render_text(self):
+		self.surf.fill(self.bgcolor)
+		rect = self.font.get_rect(self._text)
+		x_offset = (self.w-rect.w)/2
+		y_offset = (self.h-rect.h)/2
 		if self.changed:
-			return self.font.render(self._text)
-
-		return self.surf
-
+			self.font.render_to(self.surf, (x_offset, y_offset), text=self._text)
 
 
 
