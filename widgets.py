@@ -25,7 +25,7 @@ class Widget(object):
 		elif img:
 			self.surf = self.load_img(img)
 
-		self.changed = False #whether the surface has changed since the last time the container read it.
+		self.changed = True #whether the surface has changed since the last time the container read it.
 
 
 	def load_img(self, path):
@@ -61,26 +61,73 @@ class Container(object):
 		self.visible = visible
 		
 		self.widgets = {}
+		#an entry looks as such
+		#Button: [resized_surf, area_rect, needs_resize, hover]
+		#Widget: [Surface, Rect, Bool, Bool]
+		self.hovered = [] #lsit of rect, widget tuples
 		self.surf = None
 
 
-	def add(self, widget, x, y, w=None, h=None, fit=False, override=False):
+	def add(self, widget, x, y, w=None, h=None, fit=False, override=False, hover=False):
 		"""adds the specified widget to the ones handled by the container. \
-		x: horizontal position of the widget in the container
-		y: vertical position of the widget in the container
-		w: how much of the width of the container the widget should use"""
-		pass
+		x:        horizontal position of the widget in the container
+		y:        vertical position of the widget in the container
+		w:        how much of the width of the container the widget should use, in percentage
+		h:        how much of the height of the container the widget should use, in percentage
+		**TODO**:fit:      if True will override all other parameters and make the widget use the whole container surface
+		override: whether the new widget dimensions can go over existing widgets
+		hover:    if the hovered attribute of the widget should be set to True when the mouse hovers the said widget surface"""
+		
+		#building dimensions
+		if w!=None:
+			rw=int(w*self.w) #may need to change that int for blankspace may be left
+		else:
+			rw = widget.w
 
+		if h!=None:
+			rh=int(h*self.h)
+		else:
+			rh = widget.h
+
+		assert rw<=self.w and rh<=self.h, ValueError(f"Dimensions are too big. Specified width ({w}) and height ({h}) should be inferior or equal to {self.w} and {self.h} respectively")
+		rect = pg.Rect(x, y, rw, rh)
+
+		#handling overblitting protection
+		if not override:
+			for widget in self.widgets.values():				
+				if rect.colliderect(widget[1]):
+					raise ValueError(f"Could not resolve placement of widget. Provided rect ({rect}) overlaps with other widgets. Change position/dimensions or set override.") #change with return False
+
+		#making adapted surface
+		needs_resize = False
+		if rect.w==widget.w and rect.h==widget.h:
+			surf = widget.surf
+
+		else:
+			needs_resize=True
+			surf = pg.transform.scale(widget.surf, (rect.w, rect.h))
+
+		widget.changed=False
+
+		#adding widget
+		self.widgets[widget] = [surf, rect, needs_resize, hover]
+		return rect
 
 
 
 	def remove(self, widget):
-		pass
+		if self.widgets­[widget][3]==True:
+			self.hovered.pop(widget)
+		self.widgets.pop(widget)
 
 
 	def draw(self, dest, *args, **kwargs):
 		"""this will draw the container and all it's widget to the dest surface in the specified location.
 		Arguments can be a Rect instance or x, y, w, h integers. If no argument is provided then the container's attributes will be used."""
+		if self.hidden:
+			return
+
+		self.surf=self.make_surf()
 		if len(args)==0 and len(kwargs)==0:
 			dest.blit(self.surf, self.x, self.y)
 			return
@@ -103,11 +150,38 @@ class Container(object):
 			dest.blit(self.surf, (args[0], args[1]))
 
 
+	def update(self):
+		if self.hidden:
+			return
+		
+		#handling hovering
+		mouse = pg.mouse.get_pos()
+		crect = self.get_rect()
+		if crect.collidepoint(mouse):
+			for widget in self.hovers:
+				if self.widgets[widget][1].collidepoint(mouse):
+					widget.hovered=True
+					break
+
+	def make_surf(self):
+		"""updates the containers surface based upon the changes which happened to the widgets' surfaces"""
+		for widget in self.widgets:
+			if widget.changed:
+				rect = self.widgets[widget][1]
+				#may be improved by checking whether the surf needs to be normalized
+				surf = pg.transform.scale(widget.surf, rect[1].w, rect[1].h)
+				rect[0] = surf
+				self.surf.blit(surf, rect.x, rect.y)
+
+		return self.surf
+
+
 	def get_rect(self):
 		return pg.Rect(self.x, self.y, self.w, self.h)
 
 	def get_surf(self):
 		"""returns a copy of the container's surface"""
+		self.surf=self.make_surf()
 		return self.surf.copy()
 
 
