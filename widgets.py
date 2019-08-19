@@ -175,7 +175,6 @@ class Container(object):
 
 		return self.surf
 
-
 	def get_rect(self):
 		return pg.Rect(self.x, self.y, self.w, self.h)
 
@@ -183,11 +182,6 @@ class Container(object):
 		"""returns a copy of the container's surface"""
 		self.surf=self.make_surf()
 		return self.surf.copy()
-
-
-
-
-
 
 class TextWidget(Widget):
 	"""TextWidget is a class which provides methods for some common actions used by classes which render text.
@@ -199,16 +193,51 @@ class TextWidget(Widget):
 	font:       font to be used. None will default to Pygame's default font
 	underlined: whether the text should be underlined. This is a software rendering post-processing.
 	bold:       whether the text should be bold. Note that this is a software rendering post-processing done on the font. Prefer bold fonts instead."""
-	def __init__(self,w, h, surf=None, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, underlined=False, bold=False, can_hover=False):
-		super(TextWidget, self, w, h, surf=surf, alpha=alpha, can_hover=can_hover).__init__()
+	def __init__(self, w, h, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, can_hover=False, max_chars=False):
+		super(TextWidget, self, w, h, alpha=alpha, can_hover=can_hover).__init__()
 
 		#text properties
-		self.text = text
-		self.font = font #None means pg default
+		self._text = text
 		self.bgcolor = bgcolor
+		if bgcolor==None and alpha:
+			self.bgcolor = ALPHA
+		else:
+			self.bgcolor = WHITE
 		self.fgcolor = fgcolor
 		self.bold = bold
 		self.underlined = underlined
+
+		#font
+		self.font = freetype.Font(font, font_size) #None means pg default
+		self.font.underline = underlined
+		self.font.strong = bold
+		self.font.fgcolor = self.fgcolor
+		self.font.bgcolor = self.bgcolor
+
+		#surface
+		self.surf = pg.Surface(w, h)
+		if alpha:
+			self.surf = self.surf.convert_alpha()
+		else:
+			self.surf = self.surf.convert()
+
+		self.surf.fill(self.bgcolor)
+
+	@property
+	def text(self):
+		return self._text
+
+	@text.setter
+	def text(self, string):
+		self.changed = True
+		self._text = string
+		self.surf = self.render_text()
+
+	def render_text(self):
+		if self.changed:
+			return self.font.render(self._text)
+
+		return self.surf
 
 
 
