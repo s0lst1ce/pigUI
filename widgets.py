@@ -57,7 +57,10 @@ class Container(object):
 		self.y = y
 		self.w = w
 		self.h = h
-		self.bgcolor = bgcolor
+		if bgcolor:
+			self.bgcolor = bgcolor
+		else:
+			self.bgcolor = ALPHA
 		self.visible = visible
 		
 		self.widgets = {}
@@ -65,7 +68,10 @@ class Container(object):
 		#Button: [resized_surf, area_rect, needs_resize, hover]
 		#Widget: [Surface, Rect, Bool, Bool]
 		self.hovered = [] #lsit of rect, widget tuples
-		self.surf = None
+
+		#surface
+		self.surf = pg.Surface((w, h))
+		self.surf.fill(self.bgcolor)
 
 
 	def add(self, widget, x, y, w=None, h=None, fit=False, override=False, hover=False):
@@ -107,8 +113,6 @@ class Container(object):
 			needs_resize=True
 			surf = pg.transform.scale(widget.surf, (rect.w, rect.h))
 
-		widget.changed=False
-
 		#adding widget
 		self.widgets[widget] = [surf, rect, needs_resize, hover]
 		return rect
@@ -116,7 +120,7 @@ class Container(object):
 
 
 	def remove(self, widget):
-		if self.widgets­[widget][3]==True:
+		if self.widgets[widget][3]==True:
 			self.hovered.pop(widget)
 		self.widgets.pop(widget)
 
@@ -124,12 +128,12 @@ class Container(object):
 	def draw(self, dest, *args, **kwargs):
 		"""this will draw the container and all it's widget to the dest surface in the specified location.
 		Arguments can be a Rect instance or x, y, w, h integers. If no argument is provided then the container's attributes will be used."""
-		if self.hidden:
+		if not self.visible:
 			return
 
 		self.surf=self.make_surf()
 		if len(args)==0 and len(kwargs)==0:
-			dest.blit(self.surf, self.x, self.y)
+			dest.blit(self.surf, (self.x, self.y))
 			return
 
 		elif len(args)==1 and isinstance(args[0], pg.Rect):
@@ -162,16 +166,19 @@ class Container(object):
 				if self.widgets[widget][1].collidepoint(mouse):
 					widget.hovered=True
 					break
+		for widget in self.widgets:
+			widget.update()
 
 	def make_surf(self):
 		"""updates the containers surface based upon the changes which happened to the widgets' surfaces"""
 		for widget in self.widgets:
 			if widget.changed:
+				widget.changed=False
 				rect = self.widgets[widget][1]
 				#may be improved by checking whether the surf needs to be normalized
-				surf = pg.transform.scale(widget.surf, rect[1].w, rect[1].h)
-				rect[0] = surf
-				self.surf.blit(surf, rect.x, rect.y)
+				surf = pg.transform.scale(widget.surf, (rect.w, rect.h))
+				self.widgets[widget][0] = surf
+				self.surf.blit(surf, (rect.x, rect.y))
 
 		return self.surf
 
@@ -194,7 +201,7 @@ class TextWidget(Widget):
 	underlined: whether the text should be underlined. This is a software rendering post-processing.
 	bold:       whether the text should be bold. Note that this is a software rendering post-processing done on the font. Prefer bold fonts instead."""
 	def __init__(self, w, h, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, can_hover=False, max_chars=False):
-		super(TextWidget, self, w, h, alpha=alpha, can_hover=can_hover).__init__()
+		super(TextWidget, self).__init__(w, h, alpha=alpha, can_hover=can_hover)
 
 		#text properties
 		self._text = text
@@ -212,10 +219,9 @@ class TextWidget(Widget):
 		self.font.underline = underlined
 		self.font.strong = bold
 		self.font.fgcolor = self.fgcolor
-		self.font.bgcolor = self.bgcolor
 
 		#surface
-		self.surf = pg.Surface(w, h)
+		self.surf = pg.Surface((w, h))
 		if alpha:
 			self.surf = self.surf.convert_alpha()
 		else:
