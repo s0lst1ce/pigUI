@@ -25,7 +25,7 @@ class Dispatcher(object):
 	def __getitem__(self, widget):
 		to_give=[]
 		for event in self.events:
-			if event in self.widgets[widget]:
+			if event.type in self.widgets[widget]:
 				to_give.append(event)
 		return to_give
 
@@ -322,25 +322,16 @@ class AbstractButton(Widget):
 		self.h = h
 		self.action = action
 		self.events = [pg.MOUSEBUTTONUP]
-
-		self.surf = pg.Surface((w,h))
-		self.surf.fill(BLUE)
-
 		
 	def update(self):
 		super(AbstractButton, self).update()
 		if self.hovered:
 			global PYGUI_DISPATCHER
-			release = PYGUI_DISPATCHER[self]
-			if release:
-				print(release)
+			events = PYGUI_DISPATCHER[self]
+			if events:
 				self.action()
 
-class TextButton(AbstractButton, Label):
-	"""docstring for TextButton"""
-	def __init__(self, arg):
-		super(TextButton, self).__init__()
-		self.arg = arg
+
 
 '''NEEDED WIDGETS LIST
 - Label

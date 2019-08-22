@@ -13,7 +13,7 @@ clock = pg.time.Clock()
 
 
 #env
-dispatcher = Dispatcher()
+dispatcher = PYGUI_DISPATCHER
 t = Label(150, 30, text="Hello world!", bgcolor=WHITE, fgcolor=BLACK, bold=True)
 b = AbstractButton(50, 30, action=lambda:print("Hello"))
 c = Container(0, 0, 500, 500, bgcolor=GREEN)
@@ -22,6 +22,7 @@ c.add(b, 80, 80, hover=True)
 entities = [c]
 running = True
 #print(c, t, b)
+print(pg.MOUSEBUTTONUP)
 
 #GAME LOGIC
 def start():
