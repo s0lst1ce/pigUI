@@ -1,5 +1,5 @@
 import pygame as pg
-from widgets import *
+from pygui import *
 from colors import *
 
 #display
@@ -15,7 +15,7 @@ clock = pg.time.Clock()
 #env
 dispatcher = PYGUI_DISPATCHER
 t = Label(150, 30, text="Hello world!", bgcolor=WHITE, fgcolor=BLACK, bold=True)
-b = AbstractButton(50, 30, action=lambda:print("Hello"))
+b = TextButton(50, 30, action=lambda:print("Hello"))
 c = Container(0, 0, 500, 500, bgcolor=GREEN)
 c.add(t, 50, 23)
 c.add(b, 80, 80, hover=True)
