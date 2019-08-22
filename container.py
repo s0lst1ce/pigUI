@@ -1,7 +1,9 @@
 import pygame as pg
 from colors import *
+from events import *
 
-PYGUI_DISPATCHER = None
+PYGUI_DISPATCHER = get_dispatcher()
+
 class Container(object):
 	"""Container class
 

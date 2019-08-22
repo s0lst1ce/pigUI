@@ -1,6 +1,7 @@
 import pygame as pg
 from pygui import *
 from colors import *
+import inspect
 
 #display
 WIDTH = 800
@@ -15,8 +16,12 @@ clock = pg.time.Clock()
 #env
 dispatcher = PYGUI_DISPATCHER
 t = Label(150, 30, text="Hello world!", bgcolor=WHITE, fgcolor=BLACK, bold=True)
-b = TextButton(50, 30, action=lambda:print("Hello"))
+b = TextButton(100, 30, action=lambda:print("Hello"), text="World")
 c = Container(0, 0, 500, 500, bgcolor=GREEN)
+
+attrs = inspect.getmembers(TextButton, lambda a:not(inspect.isroutine(a)))
+print(f"TextButton attributes: {attrs}")
+
 c.add(t, 50, 23)
 c.add(b, 80, 80, hover=True)
 entities = [c]

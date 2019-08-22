@@ -1,6 +1,7 @@
 import pygame as pg
 from pygame import freetype
 from colors import *
+from events import *
 import os
 
 class Widget(object):
@@ -12,7 +13,7 @@ class Widget(object):
 	alpha: whether the widget must provide support for the alpha channel. If True the given surface (if any) will be converted to alpha. Likewise it will be converted to RGB profile otherwise for improved performance.
 
 	If both surf and img arguments are provided then the class will give an error upon creation."""
-	def __init__(self, w, h, surf=None, img=None, alpha=True, can_hover=False):
+	def __init__(self, w, h, surf=None, img=None, alpha=True):
 		self.w = w
 		self.h = h
 		self.hovered = False
@@ -52,8 +53,8 @@ class Label(Widget):
 	font:       font to be used. None will default to Pygame's default font
 	underlined: whether the text should be underlined. This is a software rendering post-processing.
 	bold:       whether the text should be bold. Note that this is a software rendering post-processing done on the font. Prefer bold fonts instead"""
-	def __init__(self, w, h, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, can_hover=False, max_chars=False):
-		super(Label, self).__init__(w, h, alpha=alpha, can_hover=can_hover)
+	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, **kwargs):
+		super(Label, self).__init__(w, h, alpha=alpha)
 
 		#text properties
 		self._text = text
@@ -92,7 +93,6 @@ class Label(Widget):
 	def __repr__(self):
 		return f'''<Label({self.w}, {self.h}), text="{self._text}"'''
 
-
 	@property
 	def text(self):
 		return self._text
@@ -116,13 +116,13 @@ class Label(Widget):
 
 
 class AbstractButton(Widget):
-	"""docstring for BUtton"""
-	def __init__(self, w, h, alpha=False, action=None):
+	"""docstring for Button"""
+	def __init__(self, w, h, *args, alpha=False, action=None, **kwargs):
 		self.w = w
 		self.h = h
 		self.action = action
 		self.events = [pg.MOUSEBUTTONUP]
-		
+
 	def update(self):
 		super(AbstractButton, self).update()
 		if self.hovered:
@@ -132,11 +132,10 @@ class AbstractButton(Widget):
 				self.action()
 
 
-class TextButton(Label, AbstractButton):
+class TextButton(AbstractButton, Label):
 	"""a button with text"""
-	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, can_hover=False, max_chars=False):
-		super(TextButton, self).__init__(w, h, alpha=False, action=None, text="Works", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, can_hover=False, max_chars=False)
-
+	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, max_chars=False):
+		super().__init__(w, h, alpha=False, action=action, text=text, bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, max_chars=False)
 
 
 
