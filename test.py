@@ -13,11 +13,15 @@ clock = pg.time.Clock()
 
 
 #env
-t = TextWidget(100, 30, text="Hello workd!", bgcolor=BLACK, fgcolor=WHITE)
+dispatcher = Dispatcher()
+t = Label(150, 30, text="Hello world!", bgcolor=WHITE, fgcolor=BLACK, bold=True)
+b = AbstractButton(50, 30, action=lambda:print("Hello"))
 c = Container(0, 0, 500, 500, bgcolor=GREEN)
-c.add(t, 10, 10)
+c.add(t, 50, 23)
+c.add(b, 80, 80, hover=True)
 entities = [c]
 running = True
+#print(c, t, b)
 
 #GAME LOGIC
 def start():
@@ -28,15 +32,22 @@ def start():
 def events():
 	'''processes events'''
 	global running
+	global dispatcher
+
 	pressed_keys = pg.key.get_pressed()
-	for event in pg.event.get():
+	events = pg.event.get()
+	for event in events:
 		if event.type == pg.QUIT or pressed_keys[pg.K_ESCAPE]:
 			running=False
+
+	dispatcher.process(events)
 
 
 def update():
 	'''ran each tick handles all modification based on occured events'''
-	pass
+	global entities
+	for entity in entities:
+		entity.update()
 
 def render():
 	'''handles the rendering'''

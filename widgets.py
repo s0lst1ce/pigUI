@@ -2,7 +2,37 @@ import pygame as pg
 from pygame import freetype
 from colors import *
 import os
+from collections import Sequence as sequence
 
+PYGUI_DISPATCHER = None
+def get_dispatcher():
+	global PYGUI_DISPATCHER
+	if PYGUI_DISPATCHER==None:
+		PYGUI_DISPATCHER = Dispatcher()
+	return PYGUI_DISPATCHER
+
+
+class Dispatcher(object):
+	"""This object dispatches events to all widgets which need it
+	WARNING: SHOULD ONLY BE CREATED ONCE! TRY OVERRIDING __new__ TO ASSURE THAT"""
+	def __init__(self):
+		self.widgets = {}
+		self.events = []
+
+	def __setitem__(self, widget, events):
+		self.widgets[widget] = events
+
+	def __getitem__(self, widget):
+		to_give=[]
+		for event in self.events:
+			if event in self.widgets[widget]:
+				to_give.append(event)
+		return to_give
+
+	def process(self, events):
+		self.events = events
+
+PYGUI_DISPATCHER = Dispatcher()
 
 class Widget(object):
 	"""An abstract class from which most widgets inherit. Must always belong to a Container.
@@ -50,7 +80,7 @@ class Container(object):
 	y:       vertical position used for drawing
 	w:       width of the container
 	h:       height of the container
-	bgcolor: the background color of the widet. Transparent of None. This will slow things down.
+	bgcolor: the background color of the widet. Transparent if None. This will slow things down.
 	visible: whether the container's surface should be blitter to the screen"""
 	def __init__(self, x, y, w, h, bgcolor=None, visible=True):
 		self.x = x
@@ -73,8 +103,15 @@ class Container(object):
 		self.surf = pg.Surface((w, h))
 		self.surf.fill(self.bgcolor)
 
+		#misc
+		self.dispatcher = PYGUI_DISPATCHER
 
-	def add(self, widget, x, y, w=None, h=None, fit=False, override=False, hover=False):
+
+
+	def __repr__(self):
+		return f"<Container({self.x}, {self.y}, {self.w}, {self.h}) handling {len(self.widgets)} widgets ({self.widgets})>"
+
+	def add(self, widget, x, y, w=None, h=None, fit=False, override=False, hover=False, events=None):
 		"""adds the specified widget to the ones handled by the container. \
 		x:        horizontal position of the widget in the container
 		y:        vertical position of the widget in the container
@@ -98,12 +135,11 @@ class Container(object):
 
 		assert rw<=self.w and rh<=self.h, ValueError(f"Dimensions are too big. Specified width ({w}) and height ({h}) should be inferior or equal to {self.w} and {self.h} respectively")
 		rect = pg.Rect((self.w-rw)/100*x, (self.h-rh)/100*y, rw, rh)
-		print(rect)
 
 		#handling overblitting protection
 		if not override:
-			for widget in self.widgets.values():				
-				if rect.colliderect(widget[1]):
+			for wid in self.widgets.values():				
+				if rect.colliderect(wid[1]):
 					raise ValueError(f"Could not resolve placement of widget. Provided rect ({rect}) overlaps with other widgets. Change position/dimensions or set override.") #change with return False
 
 		#making adapted surface
@@ -115,8 +151,16 @@ class Container(object):
 			needs_resize=True
 			surf = pg.transform.scale(widget.surf, (rect.w, rect.h))
 
+		#checking for events need
+		if events:
+			self.dispatcher[widget] = events
+		elif hasattr(widget, "events"):
+			self.dispatcher[widget] = widget.events
+
 		#adding widget
 		self.widgets[widget] = [surf, rect, needs_resize, hover]
+		if hover:
+			self.hovered.append(widget)
 		return rect
 
 
@@ -157,15 +201,19 @@ class Container(object):
 
 
 	def update(self):
-		if self.hidden:
+		if not self.visible:
 			return
-		
 		#handling hovering
 		mouse = pg.mouse.get_pos()
 		crect = self.get_rect()
+		for wid in self.hovered:
+			wid.hovered=False
+
 		if crect.collidepoint(mouse):
-			for widget in self.hovers:
-				if self.widgets[widget][1].collidepoint(mouse):
+			for widget in self.hovered:
+				rect = self.widgets[widget][1]
+				real_rect = pg.Rect(rect.x+self.x, rect.y+self.y, rect.w, rect.h)
+				if real_rect.collidepoint(mouse):
 					widget.hovered=True
 					break
 		for widget in self.widgets:
@@ -193,8 +241,8 @@ class Container(object):
 		return self.surf.copy()
 
 
-class TextWidget(Widget):
-	"""TextWidget is a class which provides methods for some common actions used by classes which render text.
+class Label(Widget):
+	"""Label is a class which provides methods for some common actions used by classes which render text.
 	See Widget for the 4 first arguments.
 
 	text:       string representing the text to be rendered
@@ -204,7 +252,7 @@ class TextWidget(Widget):
 	underlined: whether the text should be underlined. This is a software rendering post-processing.
 	bold:       whether the text should be bold. Note that this is a software rendering post-processing done on the font. Prefer bold fonts instead"""
 	def __init__(self, w, h, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, can_hover=False, max_chars=False):
-		super(TextWidget, self).__init__(w, h, alpha=alpha, can_hover=can_hover)
+		super(Label, self).__init__(w, h, alpha=alpha, can_hover=can_hover)
 
 		#text properties
 		self._text = text
@@ -240,6 +288,8 @@ class TextWidget(Widget):
 			raise ValueError("Text size larger than widget")
 		self.render_text()
 
+	def __repr__(self):
+		return f'''<Label({self.w}, {self.h}), text="{self._text}"'''
 
 
 	@property
@@ -264,6 +314,33 @@ class TextWidget(Widget):
 			self.font.render_to(self.surf, (x_offset, y_offset), text=self._text)
 
 
+class AbstractButton(Widget):
+	"""docstring for BUtton"""
+	def __init__(self, w, h, alpha=False, action=None):
+		super(AbstractButton, self).__init__(w, h, alpha=alpha, can_hover=True)
+		self.w = w
+		self.h = h
+		self.action = action
+		self.events = [pg.MOUSEBUTTONUP]
+
+		self.surf = pg.Surface((w,h))
+		self.surf.fill(BLUE)
+
+		
+	def update(self):
+		super(AbstractButton, self).update()
+		if self.hovered:
+			global PYGUI_DISPATCHER
+			release = PYGUI_DISPATCHER[self]
+			if release:
+				print(release)
+				self.action()
+
+class TextButton(AbstractButton, Label):
+	"""docstring for TextButton"""
+	def __init__(self, arg):
+		super(TextButton, self).__init__()
+		self.arg = arg
 
 '''NEEDED WIDGETS LIST
 - Label
