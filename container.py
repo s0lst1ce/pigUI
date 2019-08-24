@@ -70,28 +70,36 @@ class Container(object):
 		rect = surf.get_rect()
 		return cls(x, y, rect.w, rect.h, *args, background=background, **kwargs)
 
-	def add(self, widget, x, y, w=None, h=None, fit=False, override=False, hover=False, events=None):
+	def add(self, widget, x, y, w=None, h=None, cw=None, ch=None, fit=False, override=False, hover=False, events=None):
 		"""adds the specified widget to the ones handled by the container. \
-		x:        horizontal position of the widget in the container
-		y:        vertical position of the widget in the container
-		w:        how much of the width of the container the widget should use, in percentage
-		h:        how much of the height of the container the widget should use, in percentage
-		**TODO**:fit:      if True will override all other parameters and make the widget use the whole container surface
-		override: whether the new widget dimensions can go over existing widgets
-		hover:    if the hovered attribute of the widget should be set to True when the mouse hovers the said widget surface"""
-		
+		x:         horizontal position of the widget in the container
+		y:         vertical position of the widget in the container
+		w:         resize widget width to w, in pixels
+		h:         resize widget height to h, in pixels
+		cw:        how much of the width of the container the widget should use, in percentage
+		ch:        how much of the height of the container the widget should use, in percentage
+		fit:       if True will override all other parameters and make the widget use the whole container surface **TODO**
+		override:  whether the new widget dimensions can go over existing widgets
+		hover:     if the hovered attribute of the widget should be set to True when the mouse hovers the said widget surface"""
+		#making sure arguments are valid		
 		if fit:print("Ignoring 'fit' parameter")
-		#building dimensions
 		assert x<=100 and y<=100, ValueError("Can't place at more than 100% of the container's dimensions")
-		if w!=None:
-			rw=int(w*self.w) #may need to change that int for blankspace may be left
-		else:
-			rw = widget.w
+		assert (w or h) or (cw, ch), ValueError("Can't set width and height with both ratio and pixel size")
 
-		if h!=None:
-			rh=int(h*self.h)
-		else:
-			rh = widget.h
+		#building dimensions
+		rw = widget.w
+		rh = widget.h
+		if cw or ch:
+			if cw:
+				rw=int(cw*self.w) #may need to change that int for blankspace may be left
+			if ch:
+				rh=int(ch*self.h)
+
+		elif w or h:
+			if w:
+				rw = w
+			if h:
+				rh = h
 
 		assert rw<=self.w and rh<=self.h, ValueError(f"Dimensions are too big. Specified width ({w}) and height ({h}) should be inferior or equal to {self.w} and {self.h} respectively")
 		rect = pg.Rect((self.w-rw)/100*x, (self.h-rh)/100*y, rw, rh)
