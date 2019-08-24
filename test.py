@@ -15,19 +15,16 @@ clock = pg.time.Clock()
 
 #env
 dispatcher = PYGUI_DISPATCHER
-t = Label(150, 30, text="Hello world!", bgcolor=WHITE, fgcolor=BLACK, bold=True)
-b = TextButton(100, 30, action=lambda:print("Hello"), text="World")
-c = Container(0, 0, 500, 500, bgcolor=GREEN)
-
-attrs = inspect.getmembers(TextButton, lambda a:not(inspect.isroutine(a)))
-print(f"TextButton attributes: {attrs}")
-
-c.add(t, 50, 23)
+t = Label(150, 30, text="PyGUI!", bold=True, alpha=True)
+b = TextButton(100, 30, action=lambda:print("Hello"), text="World", fgcolor=BLACK, alpha=True)
+c = Container.from_background(50, 10, ("..", "png", "windows", "Window", "win6.png"))
+#c = Container(50, 0, 500, 195, background=("..", "png", "windows", "Window", "win6.png"))
+c.add(t, 50, 16)
 c.add(b, 80, 80, hover=True)
 entities = [c]
 running = True
 #print(c, t, b)
-print(pg.MOUSEBUTTONUP)
+
 
 #GAME LOGIC
 def start():
@@ -59,7 +56,7 @@ def render():
 	'''handles the rendering'''
 	global window
 	global entities
-	window.fill(WHITE)
+	window.fill(BLUE)
 	for e in entities:
 		e.draw(window)
 

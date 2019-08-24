@@ -1,38 +1,50 @@
 import pygame as pg
 from colors import *
 from events import *
+import os
 
 PYGUI_DISPATCHER = get_dispatcher()
 
 class Container(object):
 	"""Container class
 
-	x:       horizontal position used for drawing
-	y:       vertical position used for drawing
-	w:       width of the container
-	h:       height of the container
-	bgcolor: the background color of the widet. Transparent if None. This will slow things down.
-	visible: whether the container's surface should be blitter to the screen"""
-	def __init__(self, x, y, w, h, bgcolor=None, visible=True):
+	x:          horizontal position used for drawing
+	y:          vertical position used for drawing
+	w:          width of the container
+	h:          height of the container
+	bgcolor:    the background color of the widet. Transparent if None. This will slow things down.
+	visible:    whether the container's surface should be blitter to the screen
+	background: a surface or path to image to be used as background"""
+	def __init__(self, x, y, w, h, bgcolor=None, visible=True, background=None):
+		#making sure arguments are valid
+		assert bgcolor!=None or background!=None, ValueError("Can't set a background color & set a background surface.")
 		self.x = x
 		self.y = y
 		self.w = w
 		self.h = h
-		if bgcolor:
-			self.bgcolor = bgcolor
+
+		#surface
+		if background:
+			if isinstance(background, pg.Surface):
+				surf = background
+			elif isinstance(background, tuple):
+				surf = pg.image.load(os.path.join(*background)).convert()
+			self.surf = pg.transform.scale(surf, (w, h))
+
 		else:
-			self.bgcolor = ALPHA
+			if bgcolor:
+				self.bgcolor = bgcolor
+			else:
+				self.bgcolor = ALPHA
+			self.surf = pg.Surface((w, h))
+			self.surf.fill(self.bgcolor)
+
 		self.visible = visible
-		
 		self.widgets = {}
 		#an entry looks as such
 		#Button: [resized_surf, area_rect, needs_resize, hover]
 		#Widget: [Surface, Rect, Bool, Bool]
 		self.hovered = [] #lsit of rect, widget tuples
-
-		#surface
-		self.surf = pg.Surface((w, h))
-		self.surf.fill(self.bgcolor)
 
 		#misc
 		self.dispatcher = PYGUI_DISPATCHER
@@ -41,6 +53,18 @@ class Container(object):
 
 	def __repr__(self):
 		return f"<Container({self.x}, {self.y}, {self.w}, {self.h}) handling {len(self.widgets)} widgets ({self.widgets})>"
+
+	@classmethod
+	def from_background(cls, x, y, background, *args, **kwargs):
+		if isinstance(background, pg.Surface):
+			surf = background
+		elif isinstance(background, tuple):
+			surf = pg.image.load(os.path.join(*background)).convert()
+		else:
+			raise TypeError(f"background must be a tuple of strings representing a path to an image or a Pygame Surface not {background}")
+
+		rect = surf.get_rect()
+		return cls(x, y, rect.w, rect.h, *args, background=background, **kwargs)
 
 	def add(self, widget, x, y, w=None, h=None, fit=False, override=False, hover=False, events=None):
 		"""adds the specified widget to the ones handled by the container. \
@@ -52,6 +76,7 @@ class Container(object):
 		override: whether the new widget dimensions can go over existing widgets
 		hover:    if the hovered attribute of the widget should be set to True when the mouse hovers the said widget surface"""
 		
+		if fit:print("Ignoring 'fit' parameter")
 		#building dimensions
 		assert x<=100 and y<=100, ValueError("Can't place at more than 100% of the container's dimensions")
 		if w!=None:

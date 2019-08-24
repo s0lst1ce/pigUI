@@ -118,6 +118,7 @@ class Label(Widget):
 class AbstractButton(Widget):
 	"""docstring for Button"""
 	def __init__(self, w, h, *args, alpha=False, action=None, **kwargs):
+		super().__init__(w, h, alpha=alpha)
 		self.w = w
 		self.h = h
 		self.action = action
