@@ -54,10 +54,13 @@ class Label(Widget):
 	bccolor:    background color
 	fgcolor:    color of the text
 	font:       font to be used. None will default to Pygame's default font
+	font_size:  the size of the fonts in font points. Overriden by enlarge and offset
 	underlined: whether the text should be underlined. This is a software rendering post-processing.
 	bold:       whether the text should be bold. Note that this is a software rendering post-processing done on the font. Prefer bold fonts instead
-	background: a surface or path to image to be used as background. Path may be a string or tuple of strings"""
-	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, **kwargs):
+	background: a surface or path to image to be used as background. Path may be a string or tuple of strings
+	enlarge:        whether the rendered text should be fitted to the widget's surface. Can be overriden by offset
+	offset:     tuple representing x and y offsets. If the rendered text is too big to respect the offsets then it will be resized. Works with enlarge."""
+	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, enlarge=True, offset=Offset(25,0), **kwargs):
 		super(Label, self).__init__(w, h, alpha=alpha)
 		#making sure arguments are valid
 		if bgcolor==None:
@@ -67,6 +70,10 @@ class Label(Widget):
 		else:
 			if background:
 				raise ValueError(f"Can't set background and bgcolor")
+
+		self.enlarge = enlarge
+		self.offset = offset
+		self.background = background
 
 		#text properties
 		self._text = text
@@ -102,11 +109,38 @@ class Label(Widget):
 			self.bgsurf.fill(self.bgcolor)
 		self.surf = self.bgsurf.copy()
 
+		#evaluating offset
+		if offset:
+			if isinstance(offset, tuple):
+				font_offset = Offset(*offset)
+			elif isinstance(offset, Offset):
+				font_offset = offset
+			else:
+				raise TypeError(f"offset must of type tuple(int, int) not {type(offset)}")
 
-		#rendering text TODO: implement font scaling to fit text into provided surface
-		nrect = self.font.get_rect(self._text)
-		if nrect.w>self.w or nrect.h>self.h:
-			raise ValueError("Text size larger than widget")
+		#resizing font
+		needs_rescale = False
+		trect = self.font.get_rect(text)
+		srect = self.surf.get_rect()
+		
+		if offset: #applying offset
+			srect.w -= font_offset.x*2
+			srect.h -= font_offset.y*2
+
+		if trect.w>srect.w or trect.h>srect.h:
+			needs_rescale = True
+		print(trect, srect)
+		if needs_rescale or enlarge:
+			ratios = (srect.w/trect.w, srect.h/trect.h)
+			scale = min(ratios)
+			self.font.size *= scale
+
+
+
+
+
+
+
 		self.make_surf()
 
 	def __repr__(self):
@@ -142,11 +176,7 @@ class Label(Widget):
 		self.make_surf(old_text=previous_text)
 
 	def render_text(self):
-		if not self.changed:
-			return self.txt_surf
-
 		return self.font.render(self._text) #save the given Rect for make_surf instead of recalculating it
-
 
 	def make_surf(self, old_text=None):
 		if not self.changed:
