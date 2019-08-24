@@ -15,7 +15,8 @@ clock = pg.time.Clock()
 
 #env
 dispatcher = Dispatcher.get()
-t = Label(150, 30, text="PyGUI!", bold=True, alpha=True)
+#t = Label(150, 30, text="PyGUI!", bold=True, alpha=True)
+t = Label.from_background(os.path.join("..", "png", "button", "blank", "textbg1.png"), text="Hello World!")
 b = TextButton(100, 30, action=lambda:print("Hello"), text="World", fgcolor=BLACK, alpha=True)
 c = Container.from_background(50, 10, os.path.join("..", "png", "windows", "Window", "win6.png"))
 #c = Container(50, 0, 500, 195, background=("..", "png", "windows", "Window", "win6.png"))

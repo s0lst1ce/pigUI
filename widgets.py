@@ -145,8 +145,7 @@ class Label(Widget):
 		if not self.changed:
 			return self.txt_surf
 
-		#offset = self.text_offsets(text=self._text)
-		return self.font.render(self._text)
+		return self.font.render(self._text) #save the given Rect for make_surf instead of recalculating it
 
 
 	def make_surf(self, old_text=None):
