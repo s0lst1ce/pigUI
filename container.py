@@ -3,7 +3,7 @@ from colors import *
 from events import *
 import os
 
-PYGUI_DISPATCHER = get_dispatcher()
+PYGUI_DISPATCHER = Dispatcher.get()
 
 class Container(object):
 	"""Container class
@@ -14,7 +14,7 @@ class Container(object):
 	h:          height of the container
 	bgcolor:    the background color of the widet. Transparent if None. This will slow things down.
 	visible:    whether the container's surface should be blitter to the screen
-	background: a surface or path to image to be used as background"""
+	background: a surface or path to image to be used as background. Path may be a string or tuple of strings"""
 	def __init__(self, x, y, w, h, bgcolor=None, visible=True, background=None):
 		#making sure arguments are valid
 		assert bgcolor!=None or background!=None, ValueError("Can't set a background color & set a background surface.")
@@ -29,6 +29,8 @@ class Container(object):
 				surf = background
 			elif isinstance(background, tuple):
 				surf = pg.image.load(os.path.join(*background)).convert()
+			elif isinstance(background, str):
+				surf = pg.image.load(background).convert()
 			self.surf = pg.transform.scale(surf, (w, h))
 
 		else:
@@ -60,6 +62,8 @@ class Container(object):
 			surf = background
 		elif isinstance(background, tuple):
 			surf = pg.image.load(os.path.join(*background)).convert()
+		elif isinstance(background, str):
+			surf = pg.image.load(background).convert()
 		else:
 			raise TypeError(f"background must be a tuple of strings representing a path to an image or a Pygame Surface not {background}")
 

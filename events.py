@@ -28,4 +28,11 @@ class Dispatcher(object):
 	def process(self, events):
 		self.events = events
 
+	@classmethod
+	def get(cls, *args, **kwargs):
+		global PYGUI_DISPATCHER
+		if PYGUI_DISPATCHER:
+			return PYGUI_DISPATCHER
+		return cls(*args, **kwargs)
+
 PYGUI_DISPATCHER = Dispatcher()
