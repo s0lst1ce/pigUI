@@ -60,7 +60,7 @@ class Label(Widget):
 	background: a surface or path to image to be used as background. Path may be a string or tuple of strings
 	enlarge:        whether the rendered text should be fitted to the widget's surface. Can be overriden by offset
 	offset:     tuple representing x and y offsets. If the rendered text is too big to respect the offsets then it will be resized. Works with enlarge."""
-	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, enlarge=True, offset=Offset(25,0), **kwargs):
+	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, enlarge=True, offset=None, **kwargs):
 		super(Label, self).__init__(w, h, alpha=alpha)
 		#making sure arguments are valid
 		if bgcolor==None:
@@ -121,7 +121,7 @@ class Label(Widget):
 		#resizing font
 		needs_rescale = False
 		trect = self.font.get_rect(text)
-		srect = self.surf.get_rect()
+		srect = self.chg_area = self.surf.get_rect()
 		
 		if offset: #applying offset
 			srect.w -= font_offset.x*2
@@ -129,17 +129,10 @@ class Label(Widget):
 
 		if trect.w>srect.w or trect.h>srect.h:
 			needs_rescale = True
-		print(trect, srect)
 		if needs_rescale or enlarge:
 			ratios = (srect.w/trect.w, srect.h/trect.h)
 			scale = min(ratios)
 			self.font.size *= scale
-
-
-
-
-
-
 
 		self.make_surf()
 
@@ -160,6 +153,11 @@ class Label(Widget):
 		rect = surf.get_rect()
 		return cls(rect.w, rect.h, *args, background=background, **kwargs)
 
+	@classmethod
+	def from_text(cls, text, *args, offset=None, **kwargs):
+		pass
+
+
 
 	@property
 	def text(self):
@@ -171,12 +169,12 @@ class Label(Widget):
 		if nrect.w>self.w or nrect.h>self.h:
 			raise ValueError("Text size larger than widget")
 		self.changed = True
-		previous_text = self._text
 		self._text = string
-		self.make_surf(old_text=previous_text)
+		self.make_surf()
 
 	def render_text(self):
-		return self.font.render(self._text) #save the given Rect for make_surf instead of recalculating it
+		rendered = self.font.render(self._text)
+		return rendered[0]
 
 	def make_surf(self, old_text=None):
 		if not self.changed:
@@ -186,12 +184,10 @@ class Label(Widget):
 		if not old_text:
 			self.surf.blit(self.bgsurf, (0, 0))
 		else:
-			subrect = self.font.get_rect(old_text)
-			offset = self.text_offsets(text=old_text)
-			self.surf.blit(self.bgsurf, (offset.x, offset.y), area=subrect)
+			self.chg_area = self.surf.blit(self.bgsurf, (offset.x, offset.y), area=self.chg_area)
 
 		offset = self.text_offsets(text=self._text)
-		self.surf.blit(self.render_text()[0], (offset.x, offset.y))
+		self.surf.blit(self.render_text(), (offset.x, offset.y))
 
 	def text_offsets(self, text=""):
 		rect = self.font.get_rect(text)
