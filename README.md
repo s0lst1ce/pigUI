@@ -2,9 +2,9 @@
   <img width="256" height="256" src="https://github.com/s0lst1ce/assets/blob/master/pig.png">
 </p>
 
-# PyGUI
+# pigUI
 
-PyGUI is a GUI toolkit for [Pygame](https://www.pygame.org/news). It provides objects that enables anyone to easily implement a GUI into their game without having to modify their game logic in any major way.
+pigUI is a GUI toolkit for [Pygame](https://www.pygame.org/news). It provides objects that enables anyone to easily implement a GUI into their game without having to modify their game logic in any major way.
 
 ​	To do this PyGUI provides a set of widgets such as Labels and Buttons which are organized into Containers. Containers are like "boxes" into which you can put your widgets. All widgets must be contained in order to be displayed.
 
