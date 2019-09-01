@@ -1,3 +1,4 @@
+![pigUI](https://image.flaticon.com/icons/svg/578/578418.svg)
 # PyGUI
 
 PyGUI is a GUI toolkit for [Pygame](https://www.pygame.org/news). It provides objects that enables anyone to easily implement a GUI into their game without having to modify their game logic in any major way.
