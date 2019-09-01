@@ -1,4 +1,7 @@
-![pigUI](https://github.com/s0lst1ce/assets/blob/master/pig.png)
+<p align="center">
+  <img width="256" height="256" src="https://github.com/s0lst1ce/assets/blob/master/pig.png">
+</p>
+
 # PyGUI
 
 PyGUI is a GUI toolkit for [Pygame](https://www.pygame.org/news). It provides objects that enables anyone to easily implement a GUI into their game without having to modify their game logic in any major way.
