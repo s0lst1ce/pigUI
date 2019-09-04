@@ -18,11 +18,11 @@ t1 = time.time()
 dispatcher = Dispatcher.get()
 #t = Label(150, 30, text="PyGUI!", bold=True, alpha=True)
 t = Label.from_background(os.path.join("..", "png", "button", "blank", "textbg1.png"), text="Hello World!", offset=(25, 0))
-#b = TextButton(100, 30, action=lambda:print("Hello"), text="World", fgcolor=BLACK, alpha=True)
-c = Container.from_background(50, 10, os.path.join("..", "png", "windows", "Window", "win6.png"))
-#c = Container(50, 0, 500, 195, background=("..", "png", "windows", "Window", "win6.png"))
+b = TextButton(100,50, action=lambda:print("Hello"), text="World", fgcolor=BLACK, alpha=True)
+#c = Container.from_background(50, 10, os.path.join("..", "png", "windows", "Window", "win6.png"))
+c = Container(50, 0, 500, 400, background=("..", "png", "windows", "Window", "win6.png"))
 c.add(t, 50, 16)#, w=150, h=50)
-#c.add(b, 80, 80, hover=True)
+c.add(b, 80, 80, hover=True)
 entities = [c]
 running = True
 #print(c, t, b)
@@ -53,7 +53,8 @@ def update():
 	global entities
 	global t1
 	global t
-	if time.time()-t1>2: t.text="what now?"
+	if time.time()-t1>1:
+		t.text= "Bonjour"
 	for entity in entities:
 		entity.update()
 

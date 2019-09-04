@@ -61,7 +61,7 @@ class Label(Widget):
 	enlarge:        whether the rendered text should be fitted to the widget's surface. Can be overriden by offset
 	offset:     tuple representing x and y offsets. If the rendered text is too big to respect the offsets then it will be resized. Works with enlarge."""
 	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, enlarge=True, offset=None, **kwargs):
-		super(Label, self).__init__(w, h, alpha=alpha)
+		super().__init__(w, h, alpha=alpha)
 		#making sure arguments are valid
 		if bgcolor==None:
 			if background==None:
@@ -157,8 +157,6 @@ class Label(Widget):
 	def from_text(cls, text, *args, offset=None, **kwargs):
 		pass
 
-
-
 	@property
 	def text(self):
 		return self._text
@@ -169,8 +167,9 @@ class Label(Widget):
 		if nrect.w>self.w or nrect.h>self.h:
 			raise ValueError("Text size larger than widget")
 		self.changed = True
+		old_text = self._text
 		self._text = string
-		self.make_surf()
+		self.make_surf(old_text=old_text)
 
 	def render_text(self):
 		rendered = self.font.render(self._text)
@@ -184,28 +183,41 @@ class Label(Widget):
 		if not old_text:
 			self.surf.blit(self.bgsurf, (0, 0))
 		else:
-			self.chg_area = self.surf.blit(self.bgsurf, (offset.x, offset.y), area=self.chg_area)
+			if self.font.get_rect(old_text)>self.font.get_rect(self._text):
+				self.surf = self.bgsurf.copy()
+			self.chg_area = self.surf.blit(self.bgsurf, (0,0), area=self.chg_area)
 
-		offset = self.text_offsets(text=self._text)
+		offset = self.text_offsets(self._text)
 		self.surf.blit(self.render_text(), (offset.x, offset.y))
 
-	def text_offsets(self, text=""):
+	def text_offsets(self, text):
 		rect = self.font.get_rect(text)
 		x_offset = (self.w-rect.w)/2
 		y_offset = (self.h-rect.h)/2
 		return(Offset(x_offset, y_offset))
 
+class HighlightedLabel(Label):
+	"""a Label which text can be highlighted"""
+	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, highlight_color=None, enlarge=True, offset=None, **kwargs):
+		super().__init__(w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, enlarge=True, offset=None, **kwargs)
+		self.highlighted = False
+						
+
+	def make_surf(self):
+		pass
+
+
 class AbstractButton(Widget):
 	"""docstring for Button"""
-	def __init__(self, w, h, *args, alpha=False, action=None, **kwargs):
-		super().__init__(w, h, alpha=alpha)
+	def __init__(self, w, h, *args, alpha=False, action=None, locked=False, **kwargs):
+		super().__init__(w, h, *args, alpha=alpha, **kwargs)
 		self.w = w
 		self.h = h
 		self.action = action
 		self.events = [pg.MOUSEBUTTONUP]
+		self.locked = locked
 
 	def update(self):
-		super(AbstractButton, self).update()
 		if self.hovered:
 			global PYGUI_DISPATCHER
 			events = PYGUI_DISPATCHER[self]
@@ -215,9 +227,12 @@ class AbstractButton(Widget):
 
 class TextButton(AbstractButton, Label):
 	"""a button with text"""
-	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, max_chars=False):
-		super().__init__(w, h, alpha=False, action=action, text=text, bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, max_chars=False)
+	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False):
+		super().__init__(w, h, alpha=alpha, action=action, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold)
 
+
+
+		
 
 
 '''NEEDED WIDGETS LIST
