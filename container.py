@@ -70,7 +70,7 @@ class Container(object):
 		rect = surf.get_rect()
 		return cls(x, y, rect.w, rect.h, *args, background=background, **kwargs)
 
-	def add(self, widget, x, y, w=None, h=None, cw=None, ch=None, fit=False, override=False, hover=False, events=None):
+	def add(self, widget, x, y, w=None, h=None, cw=None, ch=None, fit=False, override=False, events=None):
 		"""adds the specified widget to the ones handled by the container. \
 		x:         horizontal position of the widget in the container
 		y:         vertical position of the widget in the container
@@ -79,8 +79,7 @@ class Container(object):
 		cw:        how much of the width of the container the widget should use, in percentage
 		ch:        how much of the height of the container the widget should use, in percentage
 		fit:       if True will override all other parameters and make the widget use the whole container surface **TODO**
-		override:  whether the new widget dimensions can go over existing widgets
-		hover:     if the hovered attribute of the widget should be set to True when the mouse hovers the said widget surface"""
+		override:  whether the new widget dimensions can go over existing widgets"""
 		#making sure arguments are valid		
 		if fit:print("Ignoring 'fit' parameter")
 		assert x<=100 and y<=100, ValueError("Can't place at more than 100% of the container's dimensions")
@@ -126,8 +125,8 @@ class Container(object):
 			self.dispatcher[widget] = widget.events
 
 		#adding widget
-		self.widgets[widget] = [surf, rect, needs_resize, hover]
-		if hover:
+		self.widgets[widget] = [surf, rect, needs_resize, widget.hover]
+		if widget.hover:
 			self.hovered.append(widget)
 		return rect
 
