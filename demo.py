@@ -53,10 +53,6 @@ def events():
 def update():
 	'''ran each tick handles all modification based on occured events'''
 	global entities
-	global t1
-	global t
-	if time.time()-t1>1:
-		t.text= "Bonjour"
 	for entity in entities:
 		entity.update()
 

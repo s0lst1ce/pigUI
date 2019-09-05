@@ -199,14 +199,38 @@ class Label(Widget):
 
 class HighlightedLabel(Label):
 	"""a Label which text can be highlighted"""
-	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, background=None, highlight_color=None, enlarge=True, offset=None, **kwargs):
+	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=YELLOW, font=None, font_size=20, underlined=False, bold=False, background=None, highlight_color=None, enlarge=True, offset=None, **kwargs):
 		super().__init__(w, h, *args, alpha=alpha, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold, background=background, enlarge=enlarge, offset=offset, **kwargs)
 		self.highlighted = False
 		self.hover = True
 
+		#guessing highlight color
+		if not highlight_color:
+			self.highlight_color = (fgcolor[0]-(0.3*fgcolor[0]), fgcolor[1]-(0.3*fgcolor[1]), fgcolor[2]-(0.3*fgcolor[2]), fgcolor[3])
+			print(self.fgcolor, self.highlight_color)
+		else:
+			self.highlight_color = highlight_color
+		self.highlight_color = BLUE
+
+
+	def __repr__(self):
+		return f'''<HighlightedLabel({self.w}, {self.h}), text="{self._text}, hovered={self.hovered}"'''
+
 	def update(self):
-		pass
-						
+		if not self.hovered:
+			if self.highlighted:
+				self.highlighted = False
+				self.font.fgcolor = self.fgcolor
+				self.changed = True
+				self.make_surf()
+		else:
+			if self.highlighted:
+				return
+			self.highlighted = True
+			self.font.fgcolor = self.highlight_color
+			self.changed = True
+			self.make_surf()
+
 
 	def make_surf(self, old_text=None):
 		super().make_surf(old_text)
@@ -222,6 +246,7 @@ class AbstractButton(Widget):
 		self.events = [pg.MOUSEBUTTONUP]
 		self.locked = locked
 		self.hover = True
+		self.i = 0
 
 	def update(self):
 		if self.hovered:
