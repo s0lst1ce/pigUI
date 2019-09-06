@@ -5,3 +5,4 @@ from widgets import *
 from container import *
 
 print("Initialized PyGUI Python toolkit for Pygame.")
+name="pigUI"

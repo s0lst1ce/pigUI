@@ -207,10 +207,8 @@ class HighlightedLabel(Label):
 		#guessing highlight color
 		if not highlight_color:
 			self.highlight_color = (fgcolor[0]-(0.3*fgcolor[0]), fgcolor[1]-(0.3*fgcolor[1]), fgcolor[2]-(0.3*fgcolor[2]), fgcolor[3])
-			print(self.fgcolor, self.highlight_color)
 		else:
 			self.highlight_color = highlight_color
-		self.highlight_color = BLUE
 
 
 	def __repr__(self):
@@ -256,13 +254,14 @@ class AbstractButton(Widget):
 				self.action()
 
 
-class TextButton(AbstractButton, Label):
+class TextButton(AbstractButton, HighlightedLabel):
 	"""a button with text"""
 	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False):
 		super().__init__(w, h, alpha=alpha, action=action, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold)
 
 
-
+	def update(self):
+		pass
 		
 
 
