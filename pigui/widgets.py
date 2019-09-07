@@ -197,43 +197,6 @@ class Label(Widget):
 		y_offset = (self.h-rect.h)/2
 		return(Offset(x_offset, y_offset))
 
-class HighlightedLabel(Label):
-	"""a Label which text can be highlighted"""
-	def __init__(self, w, h, *args, alpha=False, text="", bgcolor=None, fgcolor=YELLOW, font=None, font_size=20, underlined=False, bold=False, background=None, highlight_color=None, enlarge=True, offset=None, **kwargs):
-		super().__init__(w, h, *args, alpha=alpha, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold, background=background, enlarge=enlarge, offset=offset, **kwargs)
-		self.highlighted = False
-		self.hover = True
-
-		#guessing highlight color
-		if not highlight_color:
-			self.highlight_color = (fgcolor[0]-(0.3*fgcolor[0]), fgcolor[1]-(0.3*fgcolor[1]), fgcolor[2]-(0.3*fgcolor[2]), fgcolor[3])
-		else:
-			self.highlight_color = highlight_color
-
-
-	def __repr__(self):
-		return f'''<HighlightedLabel({self.w}, {self.h}), text="{self._text}, hovered={self.hovered}"'''
-
-	def update(self):
-		if not self.hovered:
-			if self.highlighted:
-				self.highlighted = False
-				self.font.fgcolor = self.fgcolor
-				self.changed = True
-				self.make_surf()
-		else:
-			if self.highlighted:
-				return
-			self.highlighted = True
-			self.font.fgcolor = self.highlight_color
-			self.changed = True
-			self.make_surf()
-
-
-	def make_surf(self, old_text=None):
-		super().make_surf(old_text)
-
-
 class AbstractButton(Widget):
 	"""docstring for Button"""
 	def __init__(self, w, h, *args, alpha=False, action=None, locked=False, **kwargs):
@@ -254,15 +217,37 @@ class AbstractButton(Widget):
 				self.action()
 
 
-class TextButton(AbstractButton, HighlightedLabel):
+class TextButton(AbstractButton, Label):
 	"""a button with text"""
-	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False):
+	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, highlight_color=None):
 		super().__init__(w, h, alpha=alpha, action=action, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold)
+		self.highlighted = False
+		self.hover = True
 
+		#guessing highlight color
+		if not highlight_color:
+			self.highlight_color = (fgcolor[0]-(0.3*fgcolor[0]), fgcolor[1]-(0.3*fgcolor[1]), fgcolor[2]-(0.3*fgcolor[2]), fgcolor[3])
+		else:
+			self.highlight_color = highlight_color
+
+	def __repr__(self):
+		return f"<TextButton({self.w}, {self.h}), text={self._text}, hovered={self.hovered}"
 
 	def update(self):
-		pass
-		
+		super().update()
+		if not self.hovered:
+			if self.highlighted:
+				self.highlighted = False
+				self.font.fgcolor = self.fgcolor
+				self.changed = True
+				self.make_surf()
+		else:
+			if self.highlighted:
+				return
+			self.highlighted = True
+			self.font.fgcolor = self.highlight_color
+			self.changed = True
+			self.make_surf()
 
 
 '''NEEDED WIDGETS LIST
