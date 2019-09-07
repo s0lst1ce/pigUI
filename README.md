@@ -6,7 +6,7 @@
 
 pigUI is a GUI toolkit for [Pygame](https://www.pygame.org/news). It provides objects that enables anyone to easily implement a GUI into their game without having to modify their game logic in any major way.
 
-​	To do this PyGUI provides a set of widgets such as Labels and Buttons which are organized into Containers. Containers are like "boxes" into which you can put your widgets. All widgets must be contained in order to be displayed.
+​	To do this pigUI provides a set of widgets such as Labels and Buttons which are organized into Containers. Containers are like "boxes" into which you can put your widgets. All widgets must be contained in order to be displayed.
 
 
 
@@ -39,7 +39,7 @@ c.add(t, 50, 16)
 entities = [c]
 ```
 
-The 11 first lines are just Pygame display setup, the interesting part comes after that. There are two objects that will be created with PyGUI which aren't widgets. The first one is Dispatcher. This object will process all events for the library and will need to be integrated to the event loop. But more on that in the next section. Just remember that you need to call the `get()` classmethod on it.
+The 11 first lines are just Pygame display setup, the interesting part comes after that. There are two objects that will be created with pigUI which aren't widgets. The first one is Dispatcher. This object will process all events for the library and will need to be integrated to the event loop. But more on that in the next section. Just remember that you need to call the `get()` classmethod on it.
 
 Next comes the Container. As explained earlier this is like a box into which the widgets will be put. Here we create it from a background image. The first two parameters represents the coordinates at which the container should be placed. This can be changed later on. Next comes the path to the background image to load. This can also be a Pygame Surface.
 
@@ -49,7 +49,7 @@ Finally we create our widgets and add them the container.
 
 ### The event loop
 
-To function properly PyGUI requires an event loop. Since almost every game has one anyways this shouldn't be a problem in most cases. If you already have one: don't worry. You'll only need to add one line. The event loop loop of the demo is the following:
+To function properly pigUI requires an event loop. Since almost every game has one anyways this shouldn't be a problem in most cases. If you already have one: don't worry. You'll only need to add one line. The event loop loop of the demo is the following:
 
 ```python
 def events():
@@ -68,13 +68,13 @@ def events():
 
 
 
-As you can see the only place where PyGUI is involved is at the last lines. And that's really all that needs to be done event-wise. Supply all events which occurred this tick to the dispatcher's `process` method and you're done with it. This allows you to keep your logic readable and concise at the same time.
+As you can see the only place where pigUI is involved is at the last lines. And that's really all that needs to be done event-wise. Supply all events which occurred this tick to the dispatcher's `process` method and you're done with it. This allows you to keep your logic readable and concise at the same time.
 
 
 
 ### The main loop
 
-Now comes the core of every game: the main loop. Also called the game loop, this is where the game's logic happens. In the major part it exists to update the different objects your game is made of. PyGUI uses it to update it's widgets. However to keep it simple and concise it was built in such way that you only need to call the `update` method of all your containers. They will themselves determine if their widgets need to be updated, how and when.
+Now comes the core of every game: the main loop. Also called the game loop, this is where the game's logic happens. In the major part it exists to update the different objects your game is made of. pigUI uses it to update it's widgets. However to keep it simple and concise it was built in such way that you only need to call the `update` method of all your containers. They will themselves determine if their widgets need to be updated, how and when.
 
 ```python
 def update():
