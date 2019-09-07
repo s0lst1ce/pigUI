@@ -1,6 +1,6 @@
 import pygame as pg
-from colors import *
-from events import *
+from pigui.colors import *
+from pigui.events import *
 import os
 
 PYGUI_DISPATCHER = Dispatcher.get()

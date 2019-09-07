@@ -1,8 +1,8 @@
 import pygame as pg
 from pygame import freetype
 from collections import namedtuple
-from colors import *
-from events import *
+from pigui.colors import *
+from pigui.events import *
 import os
 
 Offset = namedtuple("Offset", ["x", "y"])
