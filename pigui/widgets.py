@@ -205,12 +205,16 @@ class AbstractButton(Widget):
 		self.h = h
 		self.action = action
 		self.events = [pg.MOUSEBUTTONUP]
-		self.locked = locked
+		self._locked = locked
 		self.hover = True
 		self.i = 0
 
+	@property
+	def locked(self):
+		return self._locked
+
 	def update(self):
-		if self.hovered:
+		if self.hovered and not self._locked:
 			global PYGUI_DISPATCHER
 			events = PYGUI_DISPATCHER[self]
 			if events:
@@ -219,10 +223,11 @@ class AbstractButton(Widget):
 
 class TextButton(AbstractButton, Label):
 	"""a button with text"""
-	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, highlight_color=None):
+	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, highlight_color=None, lock_color=LIGHT_GREY):
 		super().__init__(w, h, alpha=alpha, action=action, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold)
 		self.highlighted = False
 		self.hover = True
+		self.lock_color=lock_color
 
 		#guessing highlight color
 		if not highlight_color:
@@ -233,8 +238,25 @@ class TextButton(AbstractButton, Label):
 	def __repr__(self):
 		return f"<TextButton({self.w}, {self.h}), text={self._text}, hovered={self.hovered}"
 
+	@property
+	def locked(self):
+		return self.AbstractButton.locked()
+
+	@locked.setter
+	def locked(self, value):
+		if self._locked == bool(value):
+			return
+
+		self.font.fgcolor = bool(value)
+		self.changed=True
+		self.make_surf()
+
+
 	def update(self):
 		super().update()
+		if self._locked:
+			return
+
 		if not self.hovered:
 			if self.highlighted:
 				self.highlighted = False
@@ -248,6 +270,10 @@ class TextButton(AbstractButton, Label):
 			self.font.fgcolor = self.highlight_color
 			self.changed = True
 			self.make_surf()
+
+
+
+
 
 
 '''NEEDED WIDGETS LIST
