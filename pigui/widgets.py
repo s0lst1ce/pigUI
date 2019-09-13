@@ -223,8 +223,8 @@ class AbstractButton(Widget):
 
 class TextButton(AbstractButton, Label):
 	"""a button with text"""
-	def __init__(self, w, h, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, highlight_color=None, lock_color=LIGHT_GREY):
-		super().__init__(w, h, alpha=alpha, action=action, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold)
+	def __init__(self, w, h, *args, alpha=False, action=None, text="", bgcolor=None, fgcolor=BLACK, font=None, font_size=20, underlined=False, bold=False, highlight_color=None, lock_color=LIGHT_GREY, **kwargs):
+		super().__init__(w, h, *args, alpha=alpha, action=action, text=text, bgcolor=bgcolor, fgcolor=fgcolor, font=font, font_size=font_size, underlined=underlined, bold=bold, **kwargs)
 		self.highlighted = False
 		self.hover = True
 		self.lock_color=lock_color
@@ -237,6 +237,22 @@ class TextButton(AbstractButton, Label):
 
 	def __repr__(self):
 		return f"<TextButton({self.w}, {self.h}), text={self._text}, hovered={self.hovered}"
+
+	@classmethod
+	def from_background(cls, background, *args, **kwargs):
+		"""find a way to re-use the code in the Label class"""
+		if isinstance(background, pg.Surface):
+			surf = background
+		elif isinstance(background, tuple):
+			surf = pg.image.load(os.path.join(*background)).convert()
+		elif isinstance(background, str):
+			surf = pg.image.load(background).convert()
+		else:
+			raise TypeError(f"background must be a tuple of strings representing a path to an image or a Pygame Surface not {background}")
+
+		rect = surf.get_rect()
+		return cls(rect.w, rect.h, *args, background=background, **kwargs)
+
 
 	@property
 	def locked(self):
@@ -271,7 +287,12 @@ class TextButton(AbstractButton, Label):
 			self.changed = True
 			self.make_surf()
 
-
+class ImageButton(AbstractButton):
+	"""docstring for ImageButton"""
+	def __init__(self, w, h, alpha, action=None, locked=False, image=None, high_image=None):
+		super().__init__(w, h, alpha, action=None, locked=False, image=None, high_image=None)
+		self.image = image
+		self.high_image = high_image
 
 
 
