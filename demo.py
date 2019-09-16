@@ -12,17 +12,18 @@ pg.init()
 window = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("A Pygame GUI library by s0lst1ce")
 clock = pg.time.Clock()
+base_path = os.path.join("demo", "png")
 
 t1 = time.time()
 #env
 dispatcher = Dispatcher.get()
-t = Label.from_background(os.path.join("demo", "png", "button", "blank", "textbg2.png"), text="Hello World!", offset=(25, 0))
+t = Label.from_background(os.path.join(base_path, "button", "blank", "textbg2.png"), text="Hello World!", offset=(25, 0))
 b = TextButton(100,50, action=lambda:print("Hello"), text="World", fgcolor=ORANGE_RED, alpha=True)
-b2 = TextButton.from_background(os.path.join("demo", "png", "button", "like1.png"),100, 50, action=lambda:print("Bye!"), text="Bye", fgcolor=BLUE)
-c = Container(50, 0, 500, 400, background=("demo", "png", "windows", "Window", "win6.png"))
+b2 = ImageButton.from_image(os.path.join(base_path, "button", "like1.png"), action=lambda:print("Like"), high_image=os.path.join(base_path, "button", "like2.png"))
+c = Container(50, 0, 500, 400, background=(base_path, "windows", "Window", "win6.png"))
 c.add(t, 50, 16)#, w=150, h=50)
 c.add(b, 80, 80)
-c.add(b2, 0,100)
+c.add(b2, 0, 100)
 entities = [c]
 running = True
 

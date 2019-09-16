@@ -7,6 +7,18 @@ import os
 
 Offset = namedtuple("Offset", ["x", "y"])
 
+def load_surf(img):
+	if isinstance(img, pg.Surface):
+		surf = img
+	elif isinstance(img, tuple):
+		surf = pg.image.load(os.path.join(*img)).convert()
+	elif isinstance(img, str):
+		surf = pg.image.load(img).convert()
+	else:
+		raise TypeError(f"img must be a tuple of strings representing a path to an image or a Pygame Surface not {img}")
+
+	return surf
+
 class Widget(object):
 	"""An abstract class from which most widgets inherit. Must always belong to a Container.
 	w:     width of the widget
@@ -90,13 +102,7 @@ class Label(Widget):
 
 		#surface
 		if background:
-			if isinstance(background, pg.Surface):
-				surf = background
-			elif isinstance(background, tuple):
-				surf = pg.image.load(os.path.join(*background)).convert()
-			elif isinstance(background, str):
-				surf = pg.image.load(background).convert()
-			self.bgsurf = pg.transform.scale(surf, (w, h))
+			self.bgsurf = pg.transform.scale(load_surf(background), (w, h))
 		else:
 			if bgcolor:
 				self.bgcolor = bgcolor
@@ -142,15 +148,7 @@ class Label(Widget):
 
 	@classmethod
 	def from_background(cls, background, *args, **kwargs):
-		if isinstance(background, pg.Surface):
-			surf = background
-		elif isinstance(background, tuple):
-			surf = pg.image.load(os.path.join(*background)).convert()
-		elif isinstance(background, str):
-			surf = pg.image.load(background).convert()
-		else:
-			raise TypeError(f"background must be a tuple of strings representing a path to an image or a Pygame Surface not {background}")
-
+		surf = load_surf(background)
 		rect = surf.get_rect()
 		return cls(rect.w, rect.h, *args, background=background, **kwargs)
 
@@ -203,6 +201,7 @@ class AbstractButton(Widget):
 		super().__init__(w, h, *args, alpha=alpha, **kwargs)
 		self.w = w
 		self.h = h
+		assert action!=None, TypeError(f"Action must be a function (lambda or else), not {action}")
 		self.action = action
 		self.events = [pg.MOUSEBUTTONUP]
 		self._locked = locked
@@ -240,16 +239,7 @@ class TextButton(AbstractButton, Label):
 
 	@classmethod
 	def from_background(cls, background, *args, **kwargs):
-		"""find a way to re-use the code in the Label class"""
-		if isinstance(background, pg.Surface):
-			surf = background
-		elif isinstance(background, tuple):
-			surf = pg.image.load(os.path.join(*background)).convert()
-		elif isinstance(background, str):
-			surf = pg.image.load(background).convert()
-		else:
-			raise TypeError(f"background must be a tuple of strings representing a path to an image or a Pygame Surface not {background}")
-
+		surf = load_surf(background)
 		rect = surf.get_rect()
 		return cls(rect.w, rect.h, *args, background=background, **kwargs)
 
@@ -289,13 +279,42 @@ class TextButton(AbstractButton, Label):
 
 class ImageButton(AbstractButton):
 	"""docstring for ImageButton"""
-	def __init__(self, w, h, alpha, action=None, locked=False, image=None, high_image=None):
-		super().__init__(w, h, alpha, action=None, locked=False, image=None, high_image=None)
-		self.image = image
-		self.high_image = high_image
+	def __init__(self, w, h, alpha=False, action=None, locked=False, image=None, high_image=None):
+		super().__init__(w, h, alpha=alpha, action=action, locked=locked, image=image, high_image=high_image)
+		if not image:
+			raise TypeError("Image must be a Pygame Surface or a path to an image")
+		self.image = load_surf(image)
+		if not high_image:
+			self.high_image = self.image.copy()
+		else:
+			self.high_image = load_surf(high_image)
 
+		#surface
+		self.surf = self.image.copy()
+		self.was_hovered = False
 
+	@classmethod
+	def from_image(cls, image, *args, **kwargs):
+		"""find a way to re-use the code in the Label class"""
+		surf = load_surf(image)
+		rect = surf.get_rect()
+		return cls(rect.w, rect.h, *args, image=surf, **kwargs)
 
+	@property
+	def locked(self):
+		return self.AbstractButton.locked()
+
+	def update(self):
+		super().update()
+		if not self._locked and self.hovered:
+			self.surf = self.high_image
+			self.changed = True
+			self.was_hovered=True
+		
+		elif self.was_hovered:
+			self.surf = self.image
+			self.changed = True
+			self.was_hovered=False
 
 '''NEEDED WIDGETS LIST
 - Label
