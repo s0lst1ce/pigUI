@@ -33,6 +33,8 @@ class Widget(object):
 		self.h = h
 		self.hover = False
 		self.hovered = False
+		self.alpha=alpha
+		self.selected = False
 
 		#making surface
 		assert surf==None or img==None, ValueError(f"Both surf ({surf}) and img ({img}) were provided.")
@@ -153,7 +155,7 @@ class Label(Widget):
 		return cls(rect.w, rect.h, *args, background=background, **kwargs)
 
 	@classmethod
-	def from_text(cls, text, *args, offset=None, **kwargs):
+	def from_text(cls, text, *args, offset=None, font=None, **kwargs):
 		pass
 
 	@property
@@ -214,8 +216,7 @@ class AbstractButton(Widget):
 
 	def update(self):
 		if self.hovered and not self._locked:
-			global PYGUI_DISPATCHER
-			events = PYGUI_DISPATCHER[self]
+			events = Dispatcher()[self]
 			if events:
 				self.action()
 
@@ -315,13 +316,11 @@ class ImageButton(AbstractButton):
 			self.surf = self.image
 			self.changed = True
 			self.was_hovered=False
+			
+
 
 '''NEEDED WIDGETS LIST
-- Label
 - Input
-- Buttons
-	- ImageButton
-	- TextButton
 
 Container:
 A container holds multiple widgets into itself. It can be thought of as a "box" containing other widgets.

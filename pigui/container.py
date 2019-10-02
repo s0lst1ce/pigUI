@@ -3,8 +3,6 @@ from pigui.colors import *
 from pigui.events import *
 import os
 
-PYGUI_DISPATCHER = Dispatcher.get()
-
 class Container(object):
 	"""Container class
 
@@ -49,7 +47,7 @@ class Container(object):
 		self.hovered = [] #lsit of rect, widget tuples
 
 		#misc
-		self.dispatcher = PYGUI_DISPATCHER
+		self.dispatcher = Dispatcher()
 
 
 

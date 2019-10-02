@@ -16,7 +16,7 @@ base_path = os.path.join("demo", "png")
 
 t1 = time.time()
 #env
-dispatcher = Dispatcher.get()
+dispatcher = Dispatcher()
 t = Label.from_background(os.path.join(base_path, "button", "blank", "textbg2.png"), text="Hello World!", offset=(25, 0))
 b = TextButton(100,50, action=lambda:print("Hello"), text="World", fgcolor=ORANGE_RED, alpha=True)
 b2 = ImageButton.from_image(os.path.join(base_path, "button", "like1.png"), action=lambda:print("Like"), high_image=os.path.join(base_path, "button", "like2.png"))
