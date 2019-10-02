@@ -1,16 +1,16 @@
 import pygame as pg
 
-PYGUI_DISPATCHER = None
-def get_dispatcher():
-	global PYGUI_DISPATCHER
-	if PYGUI_DISPATCHER==None:
-		PYGUI_DISPATCHER = Dispatcher()
-	return PYGUI_DISPATCHER
+class Singleton(type):
+	"""a metaclass that makes your class a a singleton"""
+	_instances = {}	#dict so that different classes can inherit from the metaclass
+	def __call__(cls, *args, **kwargs):
+		if cls not in cls._instances:
+			cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+		return cls._instances[cls]
 
 
-class Dispatcher(object):
-	"""This object dispatches events to all widgets which need it
-	WARNING: SHOULD ONLY BE CREATED ONCE! TRY OVERRIDING __new__ TO ASSURE THAT"""
+class Dispatcher(metaclass=Singleton):
+	"""This object dispatches events to all widgets which need it"""
 	def __init__(self):
 		self.widgets = {}
 		self.events = []
@@ -27,12 +27,3 @@ class Dispatcher(object):
 
 	def process(self, events):
 		self.events = events
-
-	@classmethod
-	def get(cls, *args, **kwargs):
-		global PYGUI_DISPATCHER
-		if PYGUI_DISPATCHER:
-			return PYGUI_DISPATCHER
-		return cls(*args, **kwargs)
-
-PYGUI_DISPATCHER = Dispatcher()
