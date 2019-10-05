@@ -20,7 +20,7 @@ Although this won't be the case in bigger games the demo defines all widgets at 
 
 ```python
 import pygame as pg
-from pygui import *
+from pigui import *
 
 #display
 WIDTH = 800
