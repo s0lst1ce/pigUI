@@ -27,3 +27,5 @@ class Dispatcher(metaclass=Singleton):
 
 	def process(self, events):
 		self.events = events
+
+SELECTED = None

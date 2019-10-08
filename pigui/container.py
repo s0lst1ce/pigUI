@@ -3,6 +3,8 @@ from pigui.colors import *
 from pigui.events import *
 import os
 
+SELECTED = None
+
 class Container(object):
 	"""Container class
 
