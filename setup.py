@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pigUI",
-    version="0.0.0",
+    version="1.0.1-alpha",
     author="s0lst1ce",
     author_mail="thithib.cohergne@gmail.com",
     long_description=long_description,
@@ -19,4 +19,4 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-    install_requires=["pygame>=2.0.0"])
+    install_requires=["pygame>=2.0.0.dev3"])
