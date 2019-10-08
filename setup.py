@@ -19,4 +19,4 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-    requires=["pygame>=2"])
+    install_requires=["pygame>=2"])
