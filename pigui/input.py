@@ -63,6 +63,7 @@ class InputField(Widget):
 			return self.text[len(self.text)-shown_chars:]
 
 	def update(self):
+		events=None
 		if self.hovered:
 			events = Dispatcher()[self]
 			for e in events:
@@ -70,21 +71,23 @@ class InputField(Widget):
 					global SELECTED
 					SELECTED = self
 
-			if SELECTED:
-				for e in events:
-					if e.type==pg.KEYDOWN:
-						if e.key==8:
-							if len(self.text)<=1 or self.text==self.hint_text:
-								self.text = self.hint_text
-							else:
-								self.text = self.text[:-1]
+		if SELECTED==self:
+			if not events:
+				events = Dispatcher()[self]
+			for e in events:
+				if e.type==pg.KEYDOWN:
+					if e.key==8:
+						if len(self.text)<=1 or self.text==self.hint_text:
+							self.text = self.hint_text
 						else:
-							if self.text!=self.hint_text:
-								self.text+=e.unicode
-							else:
-								self.text = e.unicode
+							self.text = self.text[:-1]
+					else:
+						if self.text!=self.hint_text:
+							self.text+=e.unicode
+						else:
+							self.text = e.unicode
 
-						self.displayer.text = self.shown_text()
-						self.displayer.changed = True
-						self.changed = True
-						print(self.text, self.shown_text())
+					self.displayer.text = self.shown_text()
+					self.displayer.changed = True
+					self.changed = True
+					print(self.text, self.shown_text())

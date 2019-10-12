@@ -3,8 +3,6 @@ from pigui.colors import *
 from pigui.events import *
 import os
 
-SELECTED = None
-
 class Container(object):
 	"""Container class
 
@@ -17,7 +15,7 @@ class Container(object):
 	background: a surface or path to image to be used as background. Path may be a string or tuple of strings"""
 	def __init__(self, x, y, w, h, bgcolor=None, visible=True, background=None):
 		#making sure arguments are valid
-		assert bgcolor!=None or background!=None, ValueError("Can't set a background color & set a background surface.")
+		assert not (bgcolor!=None and background!=None), ValueError("Can't set a background color & set a background surface.")
 		self.x = x
 		self.y = y
 		self.w = w
@@ -83,16 +81,16 @@ class Container(object):
 		#making sure arguments are valid		
 		if fit:print("Ignoring 'fit' parameter")
 		assert x<=100 and y<=100, ValueError("Can't place at more than 100% of the container's dimensions")
-		assert (w or h) or (cw, ch), ValueError("Can't set width and height with both ratio and pixel size")
+		#assert (w or h) or (cw, ch), ValueError("Can't set width and height with both ratio and pixel size")
 
 		#building dimensions
 		rw = widget.w
 		rh = widget.h
 		if cw or ch:
 			if cw:
-				rw=int(cw*self.w) #may need to change that int for blankspace may be left
+				rw=int((cw/100)*self.w) #may need to change that int for blankspace may be left
 			if ch:
-				rh=int(ch*self.h)
+				rh=int((ch/100)*self.h)
 
 		elif w or h:
 			if w:

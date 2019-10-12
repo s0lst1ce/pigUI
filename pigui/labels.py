@@ -23,7 +23,7 @@ class Label(Widget):
 		if bgcolor==None:
 			if background==None:
 				if alpha==None:
-					raise TypeError(f"A background, bgcolor, or alpha must be set")
+					raise ValueError(f"A background, bgcolor, or alpha must be set")
 		else:
 			if background:
 				raise ValueError(f"Can't set background and bgcolor")
