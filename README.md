@@ -12,7 +12,7 @@ pigUI is a GUI toolkit for [Pygame](https://www.pygame.org/news). It provides ob
 
 ## Quickstart
 
-To demonstrate the how the library works, a `demo.py` example program has been made. In this quick preview we'll explain the principles used in the demo.
+To demonstrate how the library works, a `demo.py` example program has been made. In this quick preview we'll explain the principles used in the demo.
 
 ### Setting up environment
 
