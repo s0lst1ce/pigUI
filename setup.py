@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pigUI",
-    version="1.0.2-alpha",
+    version="1.0.4-alpha",
     author="s0lst1ce",
     author_mail="thithib.cohergne@gmail.com",
     long_description=long_description,
